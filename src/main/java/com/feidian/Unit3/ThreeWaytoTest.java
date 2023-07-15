@@ -15,7 +15,7 @@ public class ThreeWaytoTest {
     public static void main(String[] args) throws Exception {
 //        publishMessageIndividually();//发布1000个单独确认消息,耗时28135ms
 //        publishMessageBatch();//发布1000个批量确认消息,耗时391ms
-//        publishMessageAsync();//发布1000个异步确认消息,耗时140ms
+        publishMessageAsync();//发布1000个异步确认消息,耗时140ms
 
     }
 
@@ -98,12 +98,17 @@ public class ThreeWaytoTest {
                     ConcurrentNavigableMap<Long, String> confirmed =
                             outstandingConfirms.headMap(sequenceNumber, true);
 //清除该部分未确认消息
+                    System.out.println(confirmed);
                     confirmed.clear();
                 } else {
 //只清除当前序列号的消息
                     outstandingConfirms.remove(sequenceNumber);
                 }
             };
+
+
+
+
             ConfirmCallback nackCallback = (sequenceNumber, multiple) ->
             {
                 String message = outstandingConfirms.get(sequenceNumber);
@@ -114,7 +119,7 @@ public class ThreeWaytoTest {
              * 1.确认收到消息的回调
              * 2.未收到消息的回调
              */
-            channel.addConfirmListener(ackCallback, null);
+            channel.addConfirmListener(ackCallback, nackCallback);
              begin = System.currentTimeMillis();
             for (int i = 0; i < MESSAGE_COUNT; i++) {
                 String message = "消息" + i;
